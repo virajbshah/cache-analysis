@@ -1,0 +1,15 @@
+# Contains binary targets exposing our public API.
+
+package(default_visibility = ["//visibility:public"])
+
+cc_binary(
+    name = "cache-opt",
+    srcs = ["cache-opt.cpp"],
+    includes = ["include"],
+    deps = [
+        "//lib/Analysis:LoopCacheAnalysis",
+        "//lib/Analysis:LoopCounter",
+        "@llvm-project//mlir:AllPassesAndDialects",
+        "@llvm-project//mlir:MlirOptLib",
+    ],
+)

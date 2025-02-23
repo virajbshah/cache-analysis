@@ -1,0 +1,5 @@
+# Ignore `third_party` repositories containing their own BUILD files.
+third_party
+
+# Ignore Bazel directories.
+bazel-*
