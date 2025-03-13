@@ -7,6 +7,7 @@ cc_binary(
     srcs = ["cache-opt.cpp"],
     includes = ["include"],
     deps = [
+        "//lib/Analysis:CacheAnalysis",
         "//lib/Analysis:LoopCacheAnalysis",
         "//lib/Analysis:LoopCounter",
         "@llvm-project//mlir:AllPassesAndDialects",

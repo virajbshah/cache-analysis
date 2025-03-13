@@ -163,10 +163,8 @@ LoopCacheAnalysis::getLoopCacheCost(affine::AffineForOp *LoopOp) {
     } else if (auto AffineStoreOp = dyn_cast<affine::AffineStoreOp>(Op)) {
       ProcessAffineLoadOrStoreOp(AffineStoreOp);
     } else if (auto LoadOp = dyn_cast<memref::LoadOp>(Op)) {
-      // TODO: Process regular loads.
       ProcessAffineLoadOrStoreOp(LoadOp);
     } else if (auto StoreOp = dyn_cast<memref::StoreOp>(Op)) {
-      // TODO: Process regular stores.
       ProcessAffineLoadOrStoreOp(StoreOp);
     }
   }

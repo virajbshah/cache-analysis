@@ -35,3 +35,46 @@ cc_library(
         "@llvm-project//mlir:Support",
     ],
 )
+
+cc_library(
+    name = "IndexComputationGraph",
+    srcs = ["IndexComputationGraph.cpp"],
+    hdrs = ["IndexComputationGraph.h"],
+    deps = [
+        "@llvm-project//llvm:Support",
+        "@llvm-project//mlir:ArithDialect",
+        "@llvm-project//mlir:IR",
+        "@llvm-project//mlir:Support",
+    ],
+)
+
+cc_library(
+    name = "CacheAnalysisGraph",
+    srcs = ["CacheAnalysisGraph.cpp"],
+    hdrs = ["CacheAnalysisGraph.h"],
+    deps = [
+        "IndexComputationGraph",
+        "@llvm-project//mlir:AffineDialect",
+        "@llvm-project//mlir:IR",
+        "@llvm-project//mlir:MemRefDialect",
+        "@llvm-project//mlir:SCFDialect",
+    ],
+)
+
+cc_library(
+    name = "CacheAnalysis",
+    srcs = ["CacheAnalysis.cpp"],
+    hdrs = ["CacheAnalysis.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "CacheAnalysisGraph",
+        "IndexComputationGraph",
+        "@llvm-project//llvm:Support",
+        "@llvm-project//mlir:AffineDialect",
+        "@llvm-project//mlir:FuncDialect",
+        "@llvm-project//mlir:IR",
+        "@llvm-project//mlir:MemRefDialect",
+        "@llvm-project//mlir:Pass",
+        "@llvm-project//mlir:Support",
+    ],
+)

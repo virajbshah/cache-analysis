@@ -1,3 +1,4 @@
+#include "lib/Analysis/CacheAnalysis.h"
 #include "lib/Analysis/LoopCacheAnalysis.h"
 #include "lib/Analysis/LoopCounter.h"
 #include "mlir/InitAllDialects.h"
@@ -10,6 +11,7 @@ int main(int argc, char **argv) {
   mlir::registerAllDialects(Registry);
   mlir::registerAllPasses();
 
+  mlir::PassRegistration<mlir::foo::CacheAnalysis>();
   mlir::PassRegistration<mlir::foo::LoopCacheAnalysis>();
   mlir::PassRegistration<mlir::foo::LoopCounterPass>();
 
