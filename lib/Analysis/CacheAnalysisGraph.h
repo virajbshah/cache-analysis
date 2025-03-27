@@ -2,6 +2,7 @@
 #define LIB_ANALYSIS_CACHEANALYSISGRAPH_H_
 
 #include "IndexComputationGraph.h"
+#include "Utils.h"
 
 #include "mlir/Dialect/Affine/IR/AffineOps.h"
 #include "mlir/Dialect/Func/IR/FuncOps.h"
@@ -91,9 +92,9 @@ CacheAnalysisGraph::getOrAddNode(LoadOrStoreOpTy LoadOrStoreOp,
   }
 
   auto *Node = new AnalysisGraphNode{LoadOrStoreOp};
-  Node->IsAffineAccess = llvm::is_one_of<LoadOrStoreOpTy, affine::AffineLoadOp,
-                                         affine::AffineStoreOp>::value;
-  Node->AccessExpr = findAccessExpr(LoadOrStoreOp, IndexComputations);
+  Node->IsAffineAccess = is_affine_access<LoadOrStoreOpTy>::value;
+  Node->AccessExpr =
+      findAccessExpr<LoadOrStoreOpTy>(LoadOrStoreOp, IndexComputations);
 
   NodeIndices[LoadOrStoreOp] = Nodes.size();
   Nodes.push_back(Node);
@@ -107,14 +108,42 @@ template <typename LoadOrStoreOpTy>
 AffineExpr
 CacheAnalysisGraph::findAccessExpr(LoadOrStoreOpTy LoadOrStoreOp,
                                    IndexComputationGraph *IndexComputations) {
-  AffineExpr AccessExpr = getAffineConstantExpr(0, LoadOrStoreOp->getContext());
+  auto *Context = LoadOrStoreOp->getContext();
+
+  const auto &Indices = LoadOrStoreOp.getIndices();
+  llvm::SmallVector<AffineExpr> IndexExprs(Indices.size());
+  std::transform(
+      Indices.begin(), Indices.end(), IndexExprs.begin(), [&](auto Index) {
+        return IndexComputations->getOrAddNode(Index)->PartialComputationExpr;
+      });
+
+  if constexpr (is_affine_access<LoadOrStoreOpTy>::value) {
+    auto IndexMap = LoadOrStoreOp.getAffineMap();
+
+    llvm::SmallVector<AffineExpr> DimReplacements;
+    for (Value Index : Indices.take_front(IndexMap.getNumDims())) {
+      DimReplacements.push_back(
+          IndexComputations->getOrAddNode(Index)->PartialComputationExpr);
+    }
+    llvm::SmallVector<AffineExpr> SymReplacements;
+    for (Value Index : Indices.take_back(IndexMap.getNumSymbols())) {
+      SymReplacements.push_back(
+          IndexComputations->getOrAddNode(Index)->PartialComputationExpr);
+    }
+
+    auto ContextualizedIndexMap =
+        IndexMap.replaceDimsAndSymbols(DimReplacements, SymReplacements, 0,
+                                       IndexComputations->getNumSymbols());
+
+    IndexExprs.assign(ContextualizedIndexMap.getResults().begin(),
+                      ContextualizedIndexMap.getResults().end());
+  }
+
+  AffineExpr AccessExpr = getAffineConstantExpr(0, Context);
 
   const auto &[Strides, Offset] =
       LoadOrStoreOp.getMemRefType().getStridesAndOffset();
-  for (auto [Index, Stride] :
-       llvm::zip_first(LoadOrStoreOp.getIndices(), Strides)) {
-    auto IndexExpr =
-        IndexComputations->getOrAddNode(Index)->PartialComputationExpr;
+  for (auto [IndexExpr, Stride] : llvm::zip_first(IndexExprs, Strides)) {
     AccessExpr = AccessExpr + Stride * IndexExpr;
   }
 

@@ -54,6 +54,7 @@ cc_library(
     hdrs = ["CacheAnalysisGraph.h"],
     deps = [
         "IndexComputationGraph",
+        "Utils",
         "@llvm-project//mlir:AffineDialect",
         "@llvm-project//mlir:IR",
         "@llvm-project//mlir:MemRefDialect",
@@ -76,5 +77,15 @@ cc_library(
         "@llvm-project//mlir:MemRefDialect",
         "@llvm-project//mlir:Pass",
         "@llvm-project//mlir:Support",
+    ],
+)
+
+cc_library(
+    name = "Utils",
+    srcs = [],
+    hdrs = ["Utils.h"],
+    deps = [
+        "@llvm-project//llvm:Support",
+        "@llvm-project//mlir:AffineDialect",
     ],
 )
