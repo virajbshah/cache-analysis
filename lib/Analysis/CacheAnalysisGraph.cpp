@@ -1,5 +1,7 @@
 #include "CacheAnalysisGraph.h"
 
+#include "lib/Analysis/IndexComputationGraph.h"
+
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/Support/raw_ostream.h"
 

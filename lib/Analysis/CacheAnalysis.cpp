@@ -26,6 +26,7 @@ void CacheAnalysis::runOnOperation() {
   AnalysisGraph.fillConstantTransitiveEdges();
 
   AnalysisGraph.printGraph();
+  IndexComputations.printSymbolLegend();
 }
 
 } // namespace mlir::foo

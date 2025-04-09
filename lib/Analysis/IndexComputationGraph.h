@@ -51,12 +51,15 @@ public:
   IndexGraphNode *getOrAddNode(Value Val);
 
   /// Get the position of the symbol corresponding to a `Value`.
-  std::size_t getSymbolPosition(Value Val);
+  std::size_t getSymbolPosition(Value Val) const;
 
   /// Get the number of symbols currently tracked.
-  std::size_t getNumSymbols() { return Nodes.size(); }
+  std::size_t getNumSymbols() const { return Nodes.size(); }
 
-  void print();
+  void printIndexComputations() const;
+
+  /// Prints out the mapping between SSA values and symbols.
+  void printSymbolLegend() const;
 
   ~IndexComputationGraph() {
     for (auto &Node : Nodes) {

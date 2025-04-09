@@ -52,7 +52,7 @@ IndexGraphNode *IndexComputationGraph::getOrAddNode(Value Val) {
   return Node;
 }
 
-std::size_t IndexComputationGraph::getSymbolPosition(Value Val) {
+std::size_t IndexComputationGraph::getSymbolPosition(Value Val) const {
   if (auto Itr = NodeIndices.find(Val); Itr != NodeIndices.end()) {
     return Itr->second;
   }
@@ -60,9 +60,17 @@ std::size_t IndexComputationGraph::getSymbolPosition(Value Val) {
   return -1;
 }
 
-void IndexComputationGraph::print() {
-  for (auto *Node : Nodes) {
+void IndexComputationGraph::printIndexComputations() const {
+  for (const auto *Node : Nodes) {
     llvm::outs() << Node->InnerValue << " => " << Node->PartialComputationExpr
+                 << '\n';
+  }
+}
+
+void IndexComputationGraph::printSymbolLegend() const {
+  for (const auto *Node : Nodes) {
+    llvm::outs() << 's' << getSymbolPosition(Node->InnerValue) << " => "
+                 << Node->InnerValue << ", " << Node->InnerValue.getLoc()
                  << '\n';
   }
 }
