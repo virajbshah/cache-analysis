@@ -9,6 +9,7 @@
 namespace mlir::foo {
 
 void CacheAnalysis::runOnOperation() {
+  // Build initial analysis graph.
   getOperation()->walk<WalkOrder::PreOrder>([&](Operation *Op) {
     if (auto LoadOp = llvm::dyn_cast<affine::AffineLoadOp>(Op)) {
       AnalysisGraph.getOrAddNode(LoadOp, &IndexComputations);
@@ -20,6 +21,11 @@ void CacheAnalysis::runOnOperation() {
       AnalysisGraph.getOrAddNode(StoreOp, &IndexComputations);
     }
   });
+
+  // Query analysis graph for "interesting" bits.
+  AnalysisGraph.fillConstantTransitiveEdges();
+
+  AnalysisGraph.printGraph();
 }
 
 } // namespace mlir::foo

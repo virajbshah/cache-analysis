@@ -17,6 +17,7 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include <cstddef>
+#include <string>
 
 namespace mlir::foo {
 
@@ -44,6 +45,18 @@ struct AnalysisGraphNode {
 
   /// The list of outgoing edges sent from this node.
   llvm::SmallVector<AnalysisGraphEdge> Edges;
+
+  std::string toString() const {
+    std::string OutString;
+    llvm::raw_string_ostream Out(OutString);
+
+    Out << "Op@";
+    LoadOrStoreOp->getLoc()->print(Out);
+    Out << ", AccessExpr: ";
+    AccessExpr.print(Out);
+
+    return Out.str();
+  }
 };
 
 class CacheAnalysisGraph {
@@ -54,6 +67,11 @@ public:
   template <typename LoadOrStoreOpTy>
   AnalysisGraphNode *getOrAddNode(LoadOrStoreOpTy LoadOrStoreOp,
                                   IndexComputationGraph *IndexComputations);
+
+  /// Prints out a representation of the graph.
+  void printGraph() const;
+
+  void fillConstantTransitiveEdges() {}
 
   ~CacheAnalysisGraph() {
     for (auto *Node : Nodes) {
@@ -73,6 +91,10 @@ private:
   template <typename LoadOrStoreOpTy>
   void findRecursiveSelfRelation(LoadOrStoreOpTy LoadOrStoreOp,
                                  IndexComputationGraph *IndexComputations);
+
+  template <typename LoadOrStoreOpTy>
+  void findLoopingSelfRelation(LoadOrStoreOpTy LoadOrStoreOp,
+                               IndexComputationGraph *IndexComputations);
 
   // List of nodes belonging to this graph.
   llvm::SmallVector<AnalysisGraphNode *> Nodes;
@@ -219,6 +241,10 @@ void CacheAnalysisGraph::findRecursiveSelfRelation(
     llvm::outs() << IndexDeltaMap << '\n';
   }
 }
+
+template <typename LoadOrStoreOpTy>
+void CacheAnalysisGraph::findLoopingSelfRelation(
+    LoadOrStoreOpTy LoadOrStoreOp, IndexComputationGraph *IndexComputations) {}
 
 } // namespace mlir::foo
 
